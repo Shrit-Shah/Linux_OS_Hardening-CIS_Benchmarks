@@ -44,7 +44,7 @@ echo -e "\t\t\e[31;1m:::::: \e[0;7mBy: Shrit Shah & Tarun Kalyani${NC} \e[31;1m:
 
 end()
 {
-    printf "\n${C}[${W}*${C}] ${W}Press ENTER key to continue...${NC}\n\n"; read
+    echo -e "\n${C}[${W}*${C}] ${W}Press ENTER key to continue...${NC}\n\n"; read
     clear
     exit 0 &>> /dev/null
 }
@@ -52,27 +52,49 @@ end()
 #Section-1: Initial Setup
 initial_setup() 
 {
-_1.1.2.1()
+partition()
 {
-    fdisk -l | grep /dev/sd | awk '{print $2}' | cut -d: -f1
-    printf "${C}[${W}+${C}] ${W}Enter the disk name to partition [e.g. /dev/sda]: ${NC}"
-    read disk_name
-    fdisk $disk_name
-    printf "${C}[${W}+${C}] ${W}Enter the partition name [e.g. /dev/sda4]: ${NC}"
-    read part_name
-    mkfs.ext4 $part_name
-    mount $part_name /tmp
+    if [ -d $1 ]
+    then
+        echo -e "\n${C}[${W}*${C}] Creating Partition for $1... \n${NC}"
+        echo -e "${C}[${W}*${C}] Available Disks: ${NC}"
+        fdisk -l | grep "Disk /dev/sd"
+        printf "${C}[${W}+${C}] ${W}Enter the disk name to partition [/dev/sdX]: ${NC}"
+        read disk_name
+        echo -e "n\np\n\n\n+5G\n\nw" | fdisk $disk_name &>> /dev/null
+        fdisk -l | grep $disk_name
+        if [ $? -ne 0 ]
+        then
+            echo -e "${R}[${W}!${R}] ${BR}${blink}Error Creating Partition${NC}"
+            exit 1
+        else
+            echo -e "${G}[${W}^${G}] ${BG}Partition Created Successfully${NC}"
+        fi
+        printf "${C}[${W}+${C}] ${W}Enter the partition name [e.g. /dev/sdb1]: ${NC}"
+        read part_name
+        mkfs.ext4 $part_name &>> /dev/null
+        echo "$part_name $1 ext4 defaults,${2},${3},${4} 0 2 " >> /etc/fstab
+        mount $part_name $1 &>> /dev/null
+        if [ $? -ne 0 ]
+        then
+            echo -e "${R}[${W}!${R}] ${BR}${blink}Error Mounting Partition${NC}"
+            exit 1
+        else
+                mount_part=$(df -hT $part_name)
+            echo -e "${G}[${W}^${G}] ${BG}Partition Mounted Successfully:${NC}\n${mount_part}"
+        fi 
+    fi
 }
 
 while [ 0 ]
 do
-    echo -e "\v-----${BOLD}1. Initial Setup: IG-1 Controls${NC}-----"
-    echo -e "\v\t${C}[${W}1${C}]  ${Y} \n"
-    echo -e "\t${C}[${W}2${C}]  ${Y} \n"
-    echo -e "\t${C}[${W}3${C}]  ${Y} \n"
-    echo -e "\t${C}[${W}4${C}]  ${Y} \n"
-    echo -e "\t${C}[${W}5${C}]  ${Y} \n"
-    echo -e "\t${C}[${W}6${C}]  ${Y} \n"
+    echo -e "\v----------${BOLD} 1. Initial Setup${NC}----------"
+    echo -e "\v\t${C}[${W}1${C}] Partition Configuration:/tmp, /var, /var/tmp, /var/log, /var/log/audit & /home${Y}"
+    echo -e "\t${C}[${W}2${C}]  ${Y}"
+    echo -e "\t${C}[${W}3${C}]  ${Y}"
+    echo -e "\t${C}[${W}4${C}]  ${Y}"
+    echo -e "\t${C}[${W}5${C}]  ${Y}"
+    echo -e "\t${C}[${W}6${C}]  ${Y}"
     echo -e "\t${C}[${W}0${C}] ${Y}Exit${NC}\n"
 
     printf "${C}[${W}+${C}] Select section: ${NC}" 
@@ -80,7 +102,12 @@ do
 
     case $menu_opt in 
         1) 
-            _1.1.2.1
+            partition /tmp nodev noexec nosuid
+            partition /var nodev nosuid
+            partition /var/tmp nodev noexec nosuid
+            partition /var/log nodev noexec nosuid
+            partition /var/log/audit nodev noexec nosuid
+            partition /home nodev nosuid
             ;;
         2)  
             
@@ -110,45 +137,45 @@ break
 }
 
 #Section-2: Services
-services()
-{
-    echo ""
-}
+#services()
+#{
+#    echo ""
+#}
 
 #Section-3: Network Configuration
-net_config()
-{
+#net_config()
+#{
 
-}
+#}
 
 #Section-4: Logging & Auditing
-log_audit()
-{
+#log_audit()
+#{
 
-}
+#}
 
 #Section-5: Access, Authentication & Authorization
-AAA()
-{
+#AAA()
+#{
 
-}
+#}
 
 #Section-6: System Maintenance
-sys_maint()
-{
+#sys_maint()
+#{
 
-}
+#}
 
 #Main Menu
 while [ 0 ]
 do
     echo -e "\v-----${BOLD}CIS Benchmarks Sections${NC}-----"
-    echo -e "\v\t${C}[${W}1${C}] Initial Setup ${Y} \n"
-    echo -e "\t${C}[${W}2${C}] Services ${Y} \n"
-    echo -e "\t${C}[${W}3${C}] Network Configuration ${Y} \n"
-    echo -e "\t${C}[${W}4${C}] Logging & Auditing ${Y} \n"
-    echo -e "\t${C}[${W}5${C}] Access, Authentication & Authorization ${Y} \n"
-    echo -e "\t${C}[${W}6${C}] System Maintenance ${Y} \n"
+    echo -e "\v\t${C}[${W}1${C}] Initial Setup ${Y}"
+    echo -e "\t${C}[${W}2${C}] Services ${Y}"
+    echo -e "\t${C}[${W}3${C}] Network Configuration ${Y}"
+    echo -e "\t${C}[${W}4${C}] Logging & Auditing ${Y}"
+    echo -e "\t${C}[${W}5${C}] Access, Authentication & Authorization ${Y}"
+    echo -e "\t${C}[${W}6${C}] System Maintenance ${Y}"
     echo -e "\t${C}[${W}0${C}] ${Y}Exit${NC}\n"
 
     printf "${C}[${W}+${C}] Select section: ${NC}" 
