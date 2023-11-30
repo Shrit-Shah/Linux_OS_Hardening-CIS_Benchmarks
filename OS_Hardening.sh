@@ -32,6 +32,7 @@ then
     which figlet &>> /dev/null #Check if figlet is installed
     if [ $? -ne 0 ]
     then 
+        echo -e "\n${C}[${W}*${C}] ${W}Installing figlet...${NC}"
         sudo apt install figlet -y &>> /dev/null
     fi
 fi
@@ -39,8 +40,8 @@ clear
 
 
 echo -e "$W"; figlet -t Ubuntu OS Hardening; echo -e "$NC"
-echo -e "\e[31;1m--- ${NC}This is a menu based automation script to harden Ubuntu Linux 22.04 LTS based on CIS Benchmarks v8 ${NC} \e[31;1m---${NC}"
 echo -e "\t\t\e[31;1m:::::: \e[0;7mBy: Shrit Shah & Tarun Kalyani${NC} \e[31;1m::::::${NC}"
+echo -e "\e[31;1m--- ${NC}This is a menu based automation script to harden Ubuntu Linux 22.04 LTS based on CIS Benchmarks v8 ${NC} \e[31;1m---${NC}"
 
 end()
 {
@@ -66,7 +67,6 @@ partition()
         if [ $? -ne 0 ]
         then
             echo -e "${R}[${W}!${R}] ${BR}${blink}Error Creating Partition${NC}"
-            exit 1
         else
             echo -e "${G}[${W}^${G}] ${BG}Partition Created Successfully${NC}"
         fi
@@ -78,7 +78,6 @@ partition()
         if [ $? -ne 0 ]
         then
             echo -e "${R}[${W}!${R}] ${BR}${blink}Error Mounting Partition${NC}"
-            exit 1
         else
                 mount_part=$(df -hT $part_name)
             echo -e "${G}[${W}^${G}] ${BG}Partition Mounted Successfully:${NC}\n${mount_part}"
@@ -88,14 +87,12 @@ partition()
 
 while [ 0 ]
 do
-    echo -e "\v----------${BOLD} 1. Initial Setup${NC}----------"
-    echo -e "\v\t${C}[${W}1${C}] Partition Configuration:/tmp, /var, /var/tmp, /var/log, /var/log/audit & /home${Y}"
-    echo -e "\t${C}[${W}2${C}]  ${Y}"
-    echo -e "\t${C}[${W}3${C}]  ${Y}"
-    echo -e "\t${C}[${W}4${C}]  ${Y}"
-    echo -e "\t${C}[${W}5${C}]  ${Y}"
-    echo -e "\t${C}[${W}6${C}]  ${Y}"
-    echo -e "\t${C}[${W}0${C}] ${Y}Exit${NC}\n"
+    echo -e "\v----------${BOLD} 1. Initial Setup Configuration${NC}----------"
+    echo -e "\v\t${C}[${W}1${C}] Seperate Partitions:/tmp, /var, /var/tmp, /var/log, /var/log/audit & /home${Y}"
+    echo -e "\t${C}[${W}2${C}] Disable USB and automounting ${Y}"
+    echo -e "\t${C}[${W}3${C}] Software Patches & Upgrades ${Y}"
+    echo -e "\t${C}[${W}4${C}] Unattended Auto Download and Installation of latest stable packages${Y}"
+    echo -e "\t${C}[${W}0${C}] ${Y}Back to Main Menu${NC}\n"
 
     printf "${C}[${W}+${C}] Select section: ${NC}" 
     read menu_opt
@@ -110,19 +107,50 @@ do
             partition /home nodev nosuid
             ;;
         2)  
-            
+            echo -e "${C}[${W}*${C}] ${W}Disabling USB and automounting...${NC}"
+            systemctl disable --now udisks2.service &>> /dev/null
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Stopping udisks.service${NC}"
+            else
+                systemctl mask udisks2.service &>> /dev/null
+                echo -e "${G}[${W}^${G}] ${BG}Auto Mounting Disabled${NC}"
+            fi
+            echo 'blacklist uas' >> /etc/modprobe.d/blacklist.conf
+            echo 'blacklist usb_storage' >> /etc/modprobe.d/blacklist.conf
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Disabling USB${NC}"
+            else
+                echo -e "${G}[${W}^${G}] ${BG}USB Disabled: Will be enforced on next reboot.${NC}"
+            fi
             ;;
         3)  
-            
+            echo -e "${C}[${W}*${C}] ${W}Updating Packages...${NC}"
+            apt update && apt upgrade -y
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Updating Packages${NC}"
+            else
+                echo -e "${G}[${W}^${G}] ${BG}Packages Updated Successfully${NC}"
+            fi
             ;;
         4)  
-            
-            ;;
-        5)  
-            
-            ;;
-        6)  
-            
+            echo -e "${C}[${W}*${C}] ${W}Configuring Unattended Upgrades...${NC}"
+            apt install unattended-upgrades -y &>> /dev/null
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Installing unattended-upgrades${NC}"
+            else
+                echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Installed Successfully${NC}"
+                dpkg-reconfigure -plow unattended-upgrades &>> /dev/null
+                if [ $? -ne 0 ]
+                then
+                    echo -e "${R}[${W}!${R}] ${BR}${blink}Error Configuring unattended-upgrades${NC}"
+                else
+                    echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Configured Successfully${NC}"
+                fi
+            fi
             ;;
         0) 
             echo -e "${C}[${W}*${C}] ${R}Exiting to Main Menu...${NC}"
@@ -133,14 +161,13 @@ do
             ;;
     esac
 done
-break
 }
 
-#Section-2: Services
-#services()
-#{
-#    echo ""
-#}
+Section-2: Services
+services()
+{
+    echo -e "${Y}[${W}-${Y}] ${BW}So far the Script is implmented for CIS Controls in IG1. And the ${BOLD}2. Services${NC}${BW} section of the Benchmarks is not a part of IG-1 ${NC}"
+}
 
 #Section-3: Network Configuration
 #net_config()
@@ -169,7 +196,7 @@ break
 #Main Menu
 while [ 0 ]
 do
-    echo -e "\v-----${BOLD}CIS Benchmarks Sections${NC}-----"
+    echo -e "\v----------${BOLD}CIS Benchmarks Sections${NC}----------"
     echo -e "\v\t${C}[${W}1${C}] Initial Setup ${Y}"
     echo -e "\t${C}[${W}2${C}] Services ${Y}"
     echo -e "\t${C}[${W}3${C}] Network Configuration ${Y}"
