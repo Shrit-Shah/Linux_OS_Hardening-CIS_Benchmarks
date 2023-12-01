@@ -297,22 +297,23 @@ done
 }
 
 #Section-4: Logging & Auditing
-#log_audit()
-#{
-
-#}
+log_audit()
+{
+    echo -e "${Y}[${W}-${Y}] ${BY}Coming Soon!!!${NC}"
+}
 
 #Section-5: Access, Authentication & Authorization
-#AAA()
-#{
-
-#}
+AAA()
+{
+    echo -e "${Y}[${W}-${Y}] ${BY}So far the Script is implmented for CIS Controls in IG1. And the ${UL}5.Access, Authentication & Authorization${NC}${BY} section of the Benchmarks is not a part of IG-1.${NC}"
+    echo -e "${Y}[${W}-${Y}] ${BY}So, this section is not yet implemented in the script.${NC}"
+}
 
 #Section-6: System Maintenance
-#sys_maint()
-#{
-
-#}
+sys_maint()
+{
+    echo -e "${Y}[${W}-${Y}] ${BY}Coming Soon!!!${NC}"
+}
 
 #Main Menu
 while [ 0 ]
