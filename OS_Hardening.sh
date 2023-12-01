@@ -1,5 +1,5 @@
 #!/bin/bash
-#--------------------ASCII Font Values---------------
+#--------------------ASCII Font Values-------------------
 NC="\e[0m" #Reset/No Color modifications
 BOLD="\e[1m" #Bold
 UL="\e[4m" #Underline
@@ -62,24 +62,27 @@ partition()
         fdisk -l | grep "Disk /dev/sd"
         printf "${C}[${W}+${C}] ${W}Enter the disk name to partition [/dev/sdX]: ${NC}"
         read disk_name
-        echo -e "n\np\n\n\n+5G\n\nw" | fdisk $disk_name &>> /dev/null
-        fdisk -l | grep $disk_name
+        echo -e "n\np\n\n\n+7G\n\nw" | fdisk $disk_name &>> /dev/null
         if [ $? -ne 0 ]
         then
             echo -e "${R}[${W}!${R}] ${BR}${blink}Error Creating Partition${NC}"
         else
+            fdisk -l | grep $disk_name
             echo -e "${G}[${W}^${G}] ${BG}Partition Created Successfully${NC}"
         fi
         printf "${C}[${W}+${C}] ${W}Enter the partition name [e.g. /dev/sdb1]: ${NC}"
         read part_name
         mkfs.ext4 $part_name &>> /dev/null
-        echo "$part_name $1 ext4 defaults,${2},${3},${4} 0 2 " >> /etc/fstab
+        #echo -e "\n${C}[${W}*${C}] Backing up ${1}... [It may take a while] \n${NC}"
+        #cp -R $1 $1.bak &>> /dev/null
         mount $part_name $1 &>> /dev/null
         if [ $? -ne 0 ]
         then
             echo -e "${R}[${W}!${R}] ${BR}${blink}Error Mounting Partition${NC}"
         else
-                mount_part=$(df -hT $part_name)
+            echo "$part_name $1 ext4 defaults,${2},${3},${4} 0 0 " >> /etc/fstab
+            #cp -R $1.bak/* $1 &>> /dev/null
+            mount_part=$(df -hT $part_name)
             echo -e "${G}[${W}^${G}] ${BG}Partition Mounted Successfully:${NC}\n${mount_part}"
         fi 
     fi
@@ -147,10 +150,12 @@ do
         4)  
             partition /tmp nodev noexec nosuid
             partition /var nodev nosuid
-            partition /var/tmp nodev noexec nosuid
-            partition /var/log nodev noexec nosuid
-            partition /var/log/audit nodev noexec nosuid
+            #partition /var/tmp nodev noexec nosuid
+            #partition /var/log nodev noexec nosuid
+            #partition /var/log/audit nodev noexec nosuid
             partition /home nodev nosuid
+            echo -e "${C}[${W}*${C}] ${W}Reboot Required${NC}"
+            end
             ;;
         0) 
             echo -e "${C}[${W}*${C}] ${R}Exiting to Main Menu...${NC}"
