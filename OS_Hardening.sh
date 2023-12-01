@@ -60,7 +60,7 @@ partition()
         echo -e "\n${C}[${W}*${C}] Creating Partition for $1... \n${NC}"
         echo -e "${C}[${W}*${C}] Available Disks: ${NC}"
         fdisk -l | grep "Disk /dev/sd"
-        echo -e "${C}[${W}+${C}] ${W}Enter the disk name to partition [/dev/sdX]: ${NC}"
+        printf "${C}[${W}+${C}] ${W}Enter the disk name to partition [/dev/sdX]: ${NC}"
         read disk_name
         echo -e "n\np\n\n\n+5G\n\nw" | fdisk $disk_name &>> /dev/null
         fdisk -l | grep $disk_name
@@ -70,7 +70,7 @@ partition()
         else
             echo -e "${G}[${W}^${G}] ${BG}Partition Created Successfully${NC}"
         fi
-        echo -e "${C}[${W}+${C}] ${W}Enter the partition name [e.g. /dev/sdb1]: ${NC}"
+        printf "${C}[${W}+${C}] ${W}Enter the partition name [e.g. /dev/sdb1]: ${NC}"
         read part_name
         mkfs.ext4 $part_name &>> /dev/null
         echo "$part_name $1 ext4 defaults,${2},${3},${4} 0 2 " >> /etc/fstab
@@ -88,25 +88,44 @@ partition()
 while [ 0 ]
 do
     echo -e "\v----------${BOLD} 1. Initial Setup: System Configuration${NC}----------"
-    echo -e "\v\t${C}[${W}1${C}] Seperate Partitions:/tmp, /var, /var/tmp, /var/log, /var/log/audit & /home${NC}"
-    echo -e "\t${C}[${W}2${C}] Disable USB and automounting ${NC}"
-    echo -e "\t${C}[${W}3${C}] Software Patches & Upgrades ${NC}"
-    echo -e "\t${C}[${W}4${C}] Unattended Auto Download and Installation of latest stable packages${NC}"
+    echo -e "\v\t${C}[${W}1${C}] Software Patches & Upgrades ${NC}"
+    echo -e "\t${C}[${W}2${C}] Unattended Auto Download and Installation of latest stable packages${NC}"    
+    echo -e "\t${C}[${W}3${C}] Disable USB and automounting ${NC}"
+    echo -e "\t${C}[${W}4${C}] Seperate Partitions:/tmp, /var, /var/tmp, /var/log, /var/log/audit & /home (${Y}Needs Reboot${C})${NC}"
     echo -e "\t${C}[${W}0${C}] ${Y}Back to Main Menu${NC}\n"
 
-    echo -e "${C}[${W}+${C}] Select section: ${NC}" 
+    printf "${C}[${W}+${C}] Select section: ${NC}" 
     read menu_opt
 
     case $menu_opt in 
         1) 
-            partition /tmp nodev noexec nosuid
-            partition /var nodev nosuid
-            partition /var/tmp nodev noexec nosuid
-            partition /var/log nodev noexec nosuid
-            partition /var/log/audit nodev noexec nosuid
-            partition /home nodev nosuid
+            echo -e "${C}[${W}*${C}] ${W}Updating Packages...${NC}"
+            apt update &>> /dev/null && apt upgrade -y &>> /dev/null
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Updating Packages${NC}"
+            else
+                echo -e "${G}[${W}^${G}] ${BG}Repositories Refreshed & Packages Updated${NC}"
+            fi
             ;;
         2)  
+            echo -e "${C}[${W}*${C}] ${W}Configuring Unattended Upgrades...${NC}"
+            apt install unattended-upgrades -y &>> /dev/null
+            if [ $? -ne 0 ]
+            then
+                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Installing unattended-upgrades${NC}"
+            else
+                echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Installed Successfully${NC}"
+                dpkg-reconfigure -plow unattended-upgrades 2>> /dev/null
+                if [ $? -ne 0 ]
+                then
+                    echo -e "${R}[${W}!${R}] ${BR}${blink}Error Configuring unattended-upgrades${NC}"
+                else
+                    echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Configured Successfully${NC}"
+                fi
+            fi
+            ;;
+        3)  
             echo -e "${C}[${W}*${C}] ${W}Disabling USB and automounting...${NC}"
             systemctl disable --now udisks2.service &>> /dev/null
             if [ $? -ne 0 ]
@@ -125,32 +144,13 @@ do
                 echo -e "${G}[${W}^${G}] ${BG}USB Disabled: Will be enforced on next reboot.${NC}"
             fi
             ;;
-        3)  
-            echo -e "${C}[${W}*${C}] ${W}Updating Packages...${NC}"
-            apt update &>> /dev/null && apt upgrade -y &>> /dev/null
-            if [ $? -ne 0 ]
-            then
-                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Updating Packages${NC}"
-            else
-                echo -e "${G}[${W}^${G}] ${BG}Repositories Refreshed & Packages Updated${NC}"
-            fi
-            ;;
         4)  
-            echo -e "${C}[${W}*${C}] ${W}Configuring Unattended Upgrades...${NC}"
-            apt install unattended-upgrades -y &>> /dev/null
-            if [ $? -ne 0 ]
-            then
-                echo -e "${R}[${W}!${R}] ${BR}${blink}Error Installing unattended-upgrades${NC}"
-            else
-                echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Installed Successfully${NC}"
-                dpkg-reconfigure -plow unattended-upgrades 2>> /dev/null
-                if [ $? -ne 0 ]
-                then
-                    echo -e "${R}[${W}!${R}] ${BR}${blink}Error Configuring unattended-upgrades${NC}"
-                else
-                    echo -e "${G}[${W}^${G}] ${BG}unattended-upgrades Configured Successfully${NC}"
-                fi
-            fi
+            partition /tmp nodev noexec nosuid
+            partition /var nodev nosuid
+            partition /var/tmp nodev noexec nosuid
+            partition /var/log nodev noexec nosuid
+            partition /var/log/audit nodev noexec nosuid
+            partition /home nodev nosuid
             ;;
         0) 
             echo -e "${C}[${W}*${C}] ${R}Exiting to Main Menu...${NC}"
@@ -180,7 +180,7 @@ systemctl status $1 &>> /dev/null
     if [ $? -ne 4 ]
     then
         echo -e "${C}[${W}*${C}] ${W}${1} found in systems, it may conflict with ufw.${NC}"
-        echo -e "${C}[${W}+${C}] Do you want to remove ${1} to avoid conflict [Y/N]: ${NC}"
+        printf "${C}[${W}+${C}] Do you want to remove ${1} to avoid conflict [Y/N]: ${NC}"
         read conflict_opt
         if [ $conflict_opt == "Y" ] || [ $conflict_opt == "y" ] || [ $conflict_opt == "yes" ] || [ $conflict_opt == "Yes" ]
         then
@@ -208,7 +208,7 @@ do
     echo -e "\t${C}[${W}5${C}] View Firewall Rules${NC}"
     echo -e "\t${C}[${W}0${C}] ${Y}Back to Main Menu${NC}\n"
 
-    echo -e "${C}[${W}+${C}] Select section: ${NC}" 
+    printf "${C}[${W}+${C}] Select section: ${NC}" 
     read menu_opt
 
     case $menu_opt in 
@@ -257,10 +257,10 @@ do
             fi
             ;;
         4)  
-            echo -e "${C}[${W}+${C}] ${W}Enter the port numbers to allow inbound connections [e.g. 22,80,443]: ${NC}"
+            printf "${C}[${W}+${C}] ${W}Enter the port numbers to allow inbound connections [e.g. 22,80,443]: ${NC}"
             read port_num
             echo -e "${C}[${W}*${C}] ${W}Config: Allow inbound connections on ports: ${port_num}...${NC}"
-            ufw allow $port_num proto tcp &>> /dev/null
+            ufw allow ${port_num}/tcp &>> /dev/null
             if [ $? -ne 0 ]
             then
                 echo -e "${R}[${W}!${R}] ${BR}${blink}Error Configuring Inbound Connections${NC}"
@@ -321,7 +321,7 @@ do
     echo -e "\t${C}[${W}6${C}] System Maintenance ${NC}"
     echo -e "\t${C}[${W}0${C}] ${Y}Exit${NC}\n"
 
-    echo -e "${C}[${W}+${C}] Select section: ${NC}" 
+    printf "${C}[${W}+${C}] Select section: ${NC}" 
     read menu_opt
 
     case $menu_opt in 
