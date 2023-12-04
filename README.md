@@ -11,16 +11,16 @@ This script is designed to automate the process of hardening Ubuntu Linux 22.04 
 
 ## Installation
 1. Clone the repository or download the script.
-2. Make the script executable: `chmod +x ubuntu-hardening.sh`
-3. Run the script as root: `sudo ./ubuntu-hardening.sh`
+2. Make the script executable: `chmod +x OS_Hardening.sh`
+3. Run the script as root: `sudo ./OS_Hardening.sh`
 
 ## Usage
 The script provides a menu-driven interface for various sections:
 1. **Initial Setup**: System configuration tasks like partitioning, software updates, and disabling USB automounting.
-2. **Services**: Information about service-related controls (not implemented yet).
+2. **Services**: Information about service-related controls (Not implemented as not a part of IG-1).
 3. **Network Configuration**: Firewall settings and network security configurations.
 4. **Logging & Auditing**: (Coming soon).
-5. **Access, Authentication & Authorization**: (Not implemented as part of IG-1).
+5. **Access, Authentication & Authorization**: (Coming soon).
 6. **System Maintenance**: (Coming soon).
 
 Navigate through the menu and select the desired option to perform the corresponding action.
