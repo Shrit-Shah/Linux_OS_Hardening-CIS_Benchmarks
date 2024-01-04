@@ -29,7 +29,3 @@ Navigate through the menu and select the desired option to perform the correspon
 - Some actions (like partitioning) may require a system reboot to take effect.
 - Ensure you have a backup of critical data before making system changes.
 - This script is currently aligned with CIS Benchmarks v8 for IG1 controls.
-
----
-
-*Developed by Shrit Shah & Tarun Kalyani*
