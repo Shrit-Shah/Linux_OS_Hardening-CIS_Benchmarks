@@ -15,6 +15,20 @@ This script is designed to automate the process of hardening Ubuntu Linux 22.04 
 3. Run the script as root: `sudo ./OS_Hardening.sh`
 
 ## Usage
+As the Hardening configurations require superuser access. The script must be executed as root.
+
+![image](https://github.com/Shrit-Shah/Linux_OS_Hardening-CIS_Benchmarks/assets/45697885/385f2905-ae7d-4b4f-a553-6c1abbb6192e)
+
+The interface is aligned and colour-coded for enhanced readability, with special characters at the beginning of each sentence identifying the type of statement to tell the user.
+
+![image](https://github.com/Shrit-Shah/Linux_OS_Hardening-CIS_Benchmarks/assets/45697885/180ab545-08cc-4219-8280-38493f200978)
+![image](https://github.com/Shrit-Shah/Linux_OS_Hardening-CIS_Benchmarks/assets/45697885/b72d8c7d-1658-45d6-9397-578ade292f03)
+
+- Successful completion statements are highlighted in Green with a [^]
+- Failure completion statements blink and are highlighted in Red with a [!] character
+- [*] indicates an information statement
+- [+] indicates that user input is requested
+  
 The script provides a menu-driven interface for various sections:
 1. **Initial Setup**: System configuration tasks like partitioning, software updates, and disabling USB automounting.
 2. **Services**: Information about service-related controls (Not implemented as not a part of IG-1).
